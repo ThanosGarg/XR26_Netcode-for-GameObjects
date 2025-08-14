@@ -1,9 +1,29 @@
 using UnityEngine;
 using Unity.Netcode;
+using Unity.Collections;
+using UnityEditor;
 
 public class Player : NetworkBehaviour
 {
+    [SerializeField] private PlayerChat 
     public float moveSpeed = 5f;
+    public NetworkVariable<FixedString32Bytes> playerNName = new
+        NetworkVariable<FixedString32Bytes>(value: "",
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Owner);
+
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        if (!IsOwner) return;
+        if (PlayerSettings.PlayerName.Length <= 0)
+        {
+            Debug.Log("Cannot assign an empty name to player");
+        }
+        playerNName.Value = PlayerSettings.PlayerName;
+        Debug.Log($"This player name is {playerNName.Value}");
+    }
+
 
     private void Update()
     {
